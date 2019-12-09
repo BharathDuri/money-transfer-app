@@ -3,11 +3,14 @@
  */
 package com.moneytransfer.revolut;
 
+import org.apache.log4j.Logger;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
 import com.moneytransfer.configuration.DataSourceConfiguration;
+import com.moneytransfer.dao.AccountDetailsDAO;
+import com.moneytransfer.service.MoneyTransferService;
 
 /**
  * @author bharathduri
@@ -17,19 +20,22 @@ import com.moneytransfer.configuration.DataSourceConfiguration;
  *
  */
 public class App {
-
+	
+	final static Logger logger = Logger.getLogger(AccountDetailsDAO.class);
     private static final  int PORT_NUMBER = 8040;
 
-    public static void main(String[] args) {
-        try {
-        	    //Set up in memory db configuration
-            DataSourceConfiguration.setupDataSource();
-            //Start Server
-            startStandAloneServer();
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
-    }
+	public static void main(String[] args) {
+		try {
+			// Set up in memory db configuration
+			logger.debug("Setting up H2 memory db");
+			DataSourceConfiguration.setupDataSource();
+			// Start Server
+			logger.debug("Starting Server");
+			startStandAloneServer();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
     /**
      * Method to start Jetty Server
@@ -49,7 +55,7 @@ public class App {
 
         jerseyServlet.setInitParameter(
                 "jersey.config.server.provider.classnames",
-                MoneyTransferResource.class.getCanonicalName());
+                MoneyTransferService.class.getCanonicalName());
 
         try {
             jettyServer.start();
