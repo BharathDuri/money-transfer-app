@@ -17,7 +17,7 @@ import com.moneytransfer.model.ResponseMessage;
 import com.moneytransfer.model.TransferDetails;
 
 /**
- * Root resource (exposed at "account" path)
+ * Root resource (exposed at "revolut" path)
  */
 @Path("revolut")
 public class MoneyTransferService{
@@ -26,6 +26,8 @@ public class MoneyTransferService{
     /**
      * Method handling HTTP GET requests. The returned object will be sent
      * to the client.
+     *
+     *@param int accountNumber
      *
      * @return Account.
      */
@@ -42,8 +44,8 @@ public class MoneyTransferService{
      * Method handling HTTP PUT requests. The returned object will be sent
      * to the client.
      * 
-     * @param transactiondetails
-     * @return responseMessage
+     * @param TransferDetails transactiondetails
+     * @return ResponseMessage
      */
     @Path("/transfer")
     @PUT
@@ -66,8 +68,8 @@ public class MoneyTransferService{
      * Method handling HTTP POST requests. The returned object will be sent
      * to the client.
      * 
-     * @param account
-     * @return
+     * @param Account account 
+     * @return ResponseMessage
      */
     @Path("/createNewUser")
     @POST
@@ -80,11 +82,11 @@ public class MoneyTransferService{
     
     
     /**
-     * Method handling HTTP POST requests. The returned object will be sent
+     * Method handling HTTP DELETE requests. The returned object will be sent
      * to the client.
      * 
-     * @param account
-     * @return
+     * @param Account account 
+     * @return ResponseMessage
      */
     @Path("/deleteUser/{accountNumber}")
     @DELETE
@@ -99,8 +101,8 @@ public class MoneyTransferService{
 	/**
 	 * Method to Return success or failure messages
 	 * 
-	 * @param td
-	 * @return responseMessage
+	 * @param TransferDetails transactiondetails
+	 * @return ResponseMessage
 	 */
 	private ResponseMessage dIsplayMessage(TransferDetails transactiondetails) {
 		ResponseMessage responseMessage = new ResponseMessage();

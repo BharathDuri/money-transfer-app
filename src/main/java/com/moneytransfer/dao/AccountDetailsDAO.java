@@ -28,8 +28,8 @@ public class AccountDetailsDAO {
 	 * 
 	 * Method to get Account Object by passsing account number
 	 * 
-	 * @param accountNumber
-	 * @return
+	 * @param int accountNumber
+	 * @return Account
 	 */
 	public Account getAccount(int accountNumber) {
 		Account account = null;
@@ -73,10 +73,11 @@ public class AccountDetailsDAO {
 	 * 
 	 * Method to Update Account table with the balance for an account number
 	 * 
-	 * @param conn
-	 * @param accountNumber
-	 * @param balance
-	 * @return
+	 * @param Connection conn
+	 * @param int accountNumber
+	 * @param double balance
+	 * 
+	 * @return int
 	 */
 	public int updateAccount(Connection conn, int accountNumber, double balance) {
 
@@ -123,18 +124,20 @@ public class AccountDetailsDAO {
 			targetStmt.setLong(1, td.getToAccountNumber());
 			targetRs = targetStmt.executeQuery();
 			if (fromRs.next() && targetRs.next()) {
+				logger.debug(
+						"Accounts " + td.getFromAccountNumber() + " and " + td.getToAccountNumber() + "are valid.");
 				double availableBalance = fromRs.getDouble("BALANCE");
 				if (availableBalance < td.getAmount()) {
 					logger.error("Insufficient Funds");
-					throw new Exception("Insufficient Funds");
+					throw new Exception("Insufficient Funds-Available balance: "+availableBalance);
 				}
-				double newBalance = availableBalance - td.getAmount();
-				int updatedRows = updateAccount(conn, td.getFromAccountNumber(), newBalance);
+				double senderNewBalance = availableBalance - td.getAmount();
+				int updatedRows = updateAccount(conn, td.getFromAccountNumber(), senderNewBalance);
 				if (updatedRows != 1) {
 					throw new Exception("Failed to update the Sender's account balance");
 				}
-				newBalance = availableBalance + td.getAmount();
-				updatedRows = updateAccount(conn, td.getToAccountNumber(), newBalance);
+				double recipientNewBalance = targetRs.getDouble("BALANCE") + td.getAmount();
+				updatedRows = updateAccount(conn, td.getToAccountNumber(), recipientNewBalance);
 				if (updatedRows != 1) {
 					throw new Exception("Failed to update the Receipient's account balance");
 				}
@@ -182,7 +185,7 @@ public class AccountDetailsDAO {
 			fromStmt.setLong(1, accountNumber);
 			accountAvailableRs = fromStmt.executeQuery();
 			if (accountAvailableRs.next()) {
-				logger.debug("Account deleted for account number: " + accountNumber);
+				logger.debug("Account exists in database: " + accountNumber);
 				boolean accountDelete = deleteAccount(conn, accountNumber);
 				if (accountDelete) {
 					response.setResponseMessage("Account: " + accountNumber + "  deleted.");
@@ -242,9 +245,9 @@ public class AccountDetailsDAO {
 	
 	 /** Method to create new User Account
 	 * 
-	 * @param account
+	 * @param Account account
 	 * 
-	 * @return
+	 * @return ResponseMessage
 	 */
 	public ResponseMessage createUserAccount(Account account) {
 		Connection conn = null;
@@ -260,6 +263,7 @@ public class AccountDetailsDAO {
 			fromStmt.setLong(1, account.getAccountNumber());
 			accountAvailableRs = fromStmt.executeQuery();
 			if (!accountAvailableRs.next()) {
+				logger.debug("New User");
 				boolean accountInserted = insertAccount(conn, account);
 				if (accountInserted) {
 					response.setResponseMessage("Account for : " + account.getAccountNumber() + "  created.");
@@ -275,6 +279,7 @@ public class AccountDetailsDAO {
 			response.setResponseMessage("Error Insertring");
 			try {
 				conn.rollback();
+				return response;
 			} catch (SQLException e1) {
 				e1.printStackTrace();
 			}
@@ -291,9 +296,9 @@ public class AccountDetailsDAO {
 	}
 
 	/**
-	 * @param conn
-	 * @param account
-	 * @return
+	 * @param Connection conn
+	 * @param Account account
+	 * @return boolean
 	 */
 	private boolean insertAccount(Connection conn, Account account) {
 
