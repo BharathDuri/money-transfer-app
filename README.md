@@ -24,7 +24,7 @@ DELETE	|	`http://localhost:8040/revolut/deleteUser/{accountNumber}`	|	Delete an 
 ```json
 {
     "fromAccountNumber" : 101,
-    "toAccountNumber" : 123,
+    "toAccountNumber" : 102,
     "amount" : 10
 }
 ```
